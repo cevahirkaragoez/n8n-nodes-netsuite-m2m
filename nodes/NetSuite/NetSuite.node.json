@@ -9,12 +9,12 @@
   "resources": {
     "credentialDocumentation": [
       {
-        "url": "https://github.com/drowl87/n8n-nodes-netsuite"
+        "url": "https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m#configuration"
       }
     ],
     "primaryDocumentation": [
       {
-        "url": "https://github.com/drowl87/n8n-nodes-netsuite"
+        "url": "https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m"
       }
     ]
   }
