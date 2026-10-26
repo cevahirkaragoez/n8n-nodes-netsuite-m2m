@@ -1,7 +1,30 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Temporary files
 .DS_Store
-.tmp
-tmp
-dist
+.tmp/
+tmp/
 npm-debug.log*
 yarn.lock
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# NetSuite OAuth 2.0 M2M private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# npm package archives
+*.tgz
+
+# Local configuration
+.vscode/
+.idea/
