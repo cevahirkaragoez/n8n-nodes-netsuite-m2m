@@ -1,53 +1,58 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for AI coding assistants working in this repository.
 
-## Project Overview
+## Project
 
-Community n8n node package (`@drowl87/n8n-nodes-netsuite`) providing NetSuite ERP integration via the SuiteTalk REST API. Forked from `drudge/n8n-nodes-netsuite` with extended transaction types and security patches.
+- Package: `n8n-nodes-netsuite-m2m`
+- Maintainer / GitHub owner: `cevahirkaragoez`
+- Repository: https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m
+- Purpose: n8n community node for Oracle NetSuite SuiteTalk REST API supporting OAuth 1.0 TBA and OAuth 2.0 M2M.
+- Heritage: derived from earlier NetSuite community-node work by Nicholas Penree, Ian Dela Cruz, and David Rowley. Preserve upstream MIT copyright and attribution.
 
 ## Commands
 
 ```bash
-npm run build       # TypeScript compile + Gulp (copies icon assets to dist/)
-npm run dev         # TypeScript watch mode
-npm run lint        # ESLint on nodes/ and credentials/
-npm run lintfix     # ESLint with --fix
+npm ci
+npm run build
+npm run dev
+npm run lint
+npm run lintfix
+npm pack --dry-run
 ```
 
-No test suite exists. The project has no test framework configured.
+No automated test suite is currently configured. OAuth 2.0 M2M has not yet been validated against a live NetSuite Sandbox.
 
 ## Architecture
 
-### File Layout
+- `nodes/NetSuite/NetSuite.node.ts`: operations and execution dispatcher. Routes requests by credential authentication type.
+- `nodes/NetSuite/NetSuite.node.options.ts`: node UI fields and supported operations.
+- `nodes/NetSuite/NetSuite.node.types.ts`: shared types and request/response interfaces.
+- `credentials/NetSuiteM2M.credentials.ts`: credential type `netsuiteM2M`, with selectable OAuth 1.0 TBA and OAuth 2.0 M2M.
+- `transport/m2mRequest.ts`: OAuth 2.0 M2M JWT assertion, token exchange, token caching, and REST transport.
+- `nodes/NetSuite/NetSuite.node.json`: node metadata and documentation links.
 
-- `nodes/NetSuite/NetSuite.node.ts` — Main node class implementing `INodeType`. Contains static methods for each operation (listRecords, getRecord, insertRecord, updateRecord, removeRecord, runSuiteQL, rawRequest) plus `execute()` which dispatches by operation name.
-- `nodes/NetSuite/NetSuite.node.options.ts` — n8n UI parameter definitions (`INodeTypeDescription`). Defines available operations, record types (30+), and conditional field visibility.
-- `nodes/NetSuite/NetSuite.node.types.ts` — TypeScript interfaces/enums: `INetSuiteCredentials`, `NetSuiteRequestType`, `INetSuiteRequestOptions`, `INetSuitePagedBody`.
-- `credentials/NetSuite.credentials.ts` — n8n credential type for OAuth 1.0 (hostname, account ID, consumer key/secret, token key/secret).
+## Request flow
 
-### Request Flow
+`execute()` dispatches operations with concurrency control (`p-limit`). `makeRequest()` selects `makeM2MRequest()` for `oauth2M2M`; otherwise it uses `makeRequest()` from `@drowl87/netsuite-rest-api-client` for OAuth 1.0. Record and SuiteQL operations process responses through `handleNetsuiteResponse()`. Raw Request returns the response body or full response directly, including HTTP error responses; preserve that behavior unless explicitly asked to change it.
 
-`execute()` iterates input items with concurrency control (`p-limit`) → dispatches to the appropriate static operation method → calls `makeRequest()` from `@drowl87/netsuite-rest-api-client` → response parsed by `handleNetsuiteResponse()` which normalizes errors (throws `NodeApiError` unless `continueOnFail()`) and extracts headers (operation ID, job ID, location).
+## Dependencies
 
-### Key Dependencies
+- `@drowl87/netsuite-rest-api-client`: upstream OAuth 1.0 TBA client. Its package name is a dependency identifier, not project ownership metadata.
+- `p-limit` v3: CommonJS-compatible concurrency limiter.
+- `n8n-workflow`: n8n interfaces and runtime types.
 
-- `@drowl87/netsuite-rest-api-client` — OAuth 1.0 signed HTTP client for NetSuite REST API
-- `p-limit` (v3.x, CommonJS) — Concurrency limiter for parallel request processing. Must stay on v3 — v4+ is ESM-only and incompatible with n8n's CommonJS node loader.
-- `n8n-workflow` — Peer dependency providing n8n framework types (`INodeType`, `IExecuteFunctions`, etc.)
+## Build and release
 
-### Build Output
+TypeScript compiles into `dist/`; Gulp copies icon assets. The package publishes `dist/` and registers its node and credential paths in `package.json`.
 
-TypeScript compiles to `dist/`. Gulp copies `.png`/`.svg` icon files from source to `dist/`. Only `dist/` is published to npm. Entry points registered in `package.json` under `n8n.nodes` and `n8n.credentials`.
+GitHub Actions deployment in `.github/workflows/deploy.yml` is **manual only** (`workflow_dispatch`). It uses npm Trusted Publishing/OIDC; do not assume a push automatically publishes a release.
 
-### CI/CD
+## Conventions and safeguards
 
-GitHub Actions (`.github/workflows/deploy.yml`) publishes to npm on push to main when `package.json` changes, using OIDC trusted publishing (no long-lived npm token). The workflow uses Node 24 because npm OIDC support requires npm >= 11.5.1.
-
-## Code Conventions
-
-- Strict TypeScript (`noImplicitAny`, `strictNullChecks`)
-- Tab indentation (per `.editorconfig`)
-- Node.js `debuglog('n8n-nodes-netsuite')` for debug output (enable with `NODE_DEBUG=n8n-nodes-netsuite`)
-- Operations are static methods on the `NetSuite` class, not instance methods
-- Record type "custom" is a special case that reads `customRecordTypeScriptId` parameter instead
+- Preserve OAuth 1.0 behavior and existing HTTP 400/401/500 response handling unless explicitly requested otherwise.
+- Do not introduce token retries, request timeouts, or pagination behavior changes without approval.
+- Keep secrets, private keys, and tokens out of commits and logs.
+- Follow existing TypeScript conventions and the repository's `.editorconfig`.
+- Use `NODE_DEBUG=n8n-nodes-netsuite` for the current debug namespace.
+- Preserve upstream attribution and MIT license notices.
