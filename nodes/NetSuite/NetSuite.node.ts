@@ -22,7 +22,7 @@ import {
 	nodeDescription,
 } from './NetSuite.node.options';
 
-import { makeRequest as makeLegacyRequest } from '@drowl87/netsuite-rest-api-client';
+import { makeTBARequest } from '../../transport/tbaRequest';
 import { makeM2MRequest } from '../../transport/m2mRequest';
 
 import pLimit from 'p-limit';
@@ -93,7 +93,7 @@ const handleNetsuiteResponse = (fns: IExecuteFunctions, response: INetSuiteRespo
 
 const makeRequest = (credentials: INetSuiteCredentials, request: INetSuiteRequestOptions): Promise<INetSuiteResponse> => {
     if (credentials.authType === 'oauth2M2M') return makeM2MRequest(credentials, request);
-    return makeLegacyRequest(getConfig(credentials), request) as Promise<INetSuiteResponse>;
+    return makeTBARequest(credentials, request);
 };
 
 const getConfig = (credentials: INetSuiteCredentials) => ({
