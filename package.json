@@ -65,7 +65,6 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
-    "@drowl87/netsuite-rest-api-client": "^1.0.2",
     "p-limit": "^3.1.0"
   },
   "bugs": {
