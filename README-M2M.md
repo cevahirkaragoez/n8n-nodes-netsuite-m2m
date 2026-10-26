@@ -6,7 +6,7 @@ This project extends the earlier `@drowl87/n8n-nodes-netsuite` implementation (M
 
 ## Current status
 
-Version `0.1.0` is a development release candidate. Local build and lint checks have passed. The OAuth 1.0 TBA behavior is inherited from the existing upstream client; the newly added OAuth 2.0 M2M flow has not yet been tested against a real NetSuite Sandbox.
+Version `0.1.0` is a development release candidate. Local build and lint checks have passed. OAuth 1.0 TBA now uses a native HMAC-SHA256 transport and OAuth 2.0 M2M uses a native PS256 JWT transport. Both authentication paths require Sandbox verification before production use.
 
 ## Before publishing
 
@@ -21,7 +21,7 @@ Version `0.1.0` is a development release candidate. Local build and lint checks 
 
 The credential type is `netsuiteM2M` and the node type is `n8n-nodes-netsuite-m2m.netSuiteM2M`. Choose OAuth 1.0 TBA or OAuth 2.0 M2M in the credential.
 
-OAuth 1.0 uses the existing `@drowl87/netsuite-rest-api-client` library. That dependency name must not be changed unless the code is migrated to a replacement library.
+OAuth 1.0 uses the project's own `transport/tbaRequest.ts` implementation. The former `@drowl87/netsuite-rest-api-client` runtime dependency has been removed. Preserve attribution for earlier open-source work.
 
 The original node and this package can coexist. Existing workflows do not automatically migrate to the new node type: back up workflows, test in a separate environment, and reassign credentials when deliberately migrating.
 
