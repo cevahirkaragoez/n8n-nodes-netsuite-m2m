@@ -3,24 +3,22 @@
   "version": "0.1.0",
   "description": "Independent NetSuite community node supporting OAuth 1.0 TBA and OAuth 2.0 M2M",
   "license": "MIT",
-  "homepage": "https://github.com/YOUR-ACCOUNT/n8n-nodes-netsuite-m2m",
+  "homepage": "https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m",
   "engines": {
     "node": ">=20"
   },
   "author": {
-    "name": "David Rowley",
-    "email": "david@mygenius.co"
+    "name": "cevahirkaragoez"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-ACCOUNT/n8n-nodes-netsuite-m2m.git"
+    "url": "https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m.git"
   },
-  "main": "index.js",
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc && gulp",
     "lint": "eslint nodes credentials transport",
-    "lintfix": "eslint nodes credentials package.json --fix",
+    "lintfix": "eslint nodes credentials transport --fix",
     "prepublishOnly": "npm run build && npm run lint"
   },
   "files": [
@@ -71,7 +69,7 @@
     "p-limit": "^3.1.0"
   },
   "bugs": {
-    "url": "https://github.com/YOUR-ACCOUNT/n8n-nodes-netsuite-m2m/issues"
+    "url": "https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m/issues"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
