@@ -67,7 +67,7 @@ In the n8n credential, select **OAuth 1.0 TBA** and provide:
 - Token Key
 - Token Secret
 
-OAuth 1.0 requests use the existing `@drowl87/netsuite-rest-api-client` dependency.
+OAuth 1.0 TBA requests are signed directly by the project's native `transport/tbaRequest.ts` implementation using HMAC-SHA256. No external NetSuite REST client dependency is required. The native TBA implementation must be validated in NetSuite Sandbox before production use.
 
 ## Operations
 
@@ -102,7 +102,7 @@ Choose **Get Record**, set **Record Type** to **Customer**, and enter the custom
 - Node.js requirement declared by the package: `>=20`
 - Designed as an n8n community node; n8n 2.x runtime compatibility has **not yet been confirmed by a live installation test**.
 
-Before production use, test both authentication methods, SuiteQL, record reads and writes, error handling, and pagination in a non-production NetSuite environment.
+Before production use, test both authentication methods (including the newly replaced native TBA transport), SuiteQL, record reads and writes, error handling, and pagination in a non-production NetSuite environment.
 
 ## Development
 
