@@ -21,7 +21,7 @@ npm run lintfix
 npm pack --dry-run
 ```
 
-No automated test suite is currently configured. OAuth 2.0 M2M has not yet been validated against a live NetSuite Sandbox.
+No automated test suite is currently configured. The native OAuth 1.0 TBA replacement and OAuth 2.0 M2M have not yet been validated against a live NetSuite Sandbox.
 
 ## Architecture
 
@@ -30,15 +30,15 @@ No automated test suite is currently configured. OAuth 2.0 M2M has not yet been 
 - `nodes/NetSuite/NetSuite.node.types.ts`: shared types and request/response interfaces.
 - `credentials/NetSuiteM2M.credentials.ts`: credential type `netsuiteM2M`, with selectable OAuth 1.0 TBA and OAuth 2.0 M2M.
 - `transport/m2mRequest.ts`: OAuth 2.0 M2M JWT assertion, token exchange, token caching, and REST transport.
+- `transport/tbaRequest.ts`: native OAuth 1.0 TBA HMAC-SHA256 signing and REST transport.
 - `nodes/NetSuite/NetSuite.node.json`: node metadata and documentation links.
 
 ## Request flow
 
-`execute()` dispatches operations with concurrency control (`p-limit`). `makeRequest()` selects `makeM2MRequest()` for `oauth2M2M`; otherwise it uses `makeRequest()` from `@drowl87/netsuite-rest-api-client` for OAuth 1.0. Record and SuiteQL operations process responses through `handleNetsuiteResponse()`. Raw Request returns the response body or full response directly, including HTTP error responses; preserve that behavior unless explicitly asked to change it.
+`execute()` dispatches operations with concurrency control (`p-limit`). `makeRequest()` selects `makeM2MRequest()` for `oauth2M2M`; otherwise it uses native `makeTBARequest()` for OAuth 1.0. Record and SuiteQL operations process responses through `handleNetsuiteResponse()`. Raw Request returns the response body or full response directly, including HTTP error responses; preserve that behavior unless explicitly asked to change it.
 
 ## Dependencies
 
-- `@drowl87/netsuite-rest-api-client`: upstream OAuth 1.0 TBA client. Its package name is a dependency identifier, not project ownership metadata.
 - `p-limit` v3: CommonJS-compatible concurrency limiter.
 - `n8n-workflow`: n8n interfaces and runtime types.
 
