@@ -1,93 +1,128 @@
-# n8n-nodes-netsuite
+# n8n-nodes-netsuite-m2m
 
-![n8n.io - Workflow Automation](https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png)
+Community node for [n8n](https://n8n.io/) to work with Oracle NetSuite SuiteTalk REST Web Services. This fork adds an **OAuth 2.0 Machine-to-Machine (M2M)** authentication option while retaining **OAuth 1.0 Token-Based Authentication (TBA)**.
 
-n8n node for interacting with NetSuite using [SuiteTalk REST Web Services](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1540391670.html).
+> **Status:** Early release (`0.1.0`). The package has passed local build and lint checks, but end-to-end authentication and API operations have **not yet been verified against a live NetSuite account**. Test with a NetSuite Sandbox before using it in production.
 
-This project has been forked to extend a few additional transaction types in NetSuite as well as patch several vulnerabilities in outdated dependencies.
+## Features
 
-The community project and its dependencies and versions is [available here on NPM](https://www.npmjs.com/package/@drowl87/n8n-nodes-netsuite).
+- Select **OAuth 1.0 TBA** or **OAuth 2.0 M2M** in the same credential type.
+- List, get, insert, update and remove NetSuite records.
+- Execute SuiteQL queries.
+- Send raw REST requests.
+- Configure pagination and concurrency.
 
-## Compatibility
+Supported record types depend on NetSuite's REST API and the permissions assigned to your integration role.
 
-| n8n version | Package version |
-|-------------|-----------------|
-| v1.x        | <= 0.7.26       |
-| v2.x        | >= 0.7.27       |
+## Installation
 
-**v0.7.27** updated the package for n8n v2.0 compatibility. If you are running n8n v2.x, you must upgrade to v0.7.27 or later. Key changes:
-- Fixed a dependency bug (`@common.js/p-limit`) that caused the node to silently fail to load, resulting in `Unrecognized node type` errors
-- Updated to n8n v2 APIs (`NodeConnectionTypes`, removed deprecated `prepareOutputData`)
-- Requires Node.js >= 20
+For a self-hosted n8n instance that allows community packages:
 
-## How to install
+1. Open **Settings → Community Nodes**.
+2. Choose **Install**.
+3. Enter `n8n-nodes-netsuite-m2m`.
+4. Review the community-node security warning and install.
 
-### Community Nodes (Recommended)
+**Important:** The package must first be published to npm. Until then, the name above is not installable from the npm registry. Follow your organization's approval process before installing community code on a company n8n server.
 
-Your instance owner can install this node from [Community Nodes](https://docs.n8n.io/integrations/community-nodes/installation/).
-
-1. Go to **Settings > Community Nodes**.
-2. Select **Install**.
-3. Enter `@drowl87/n8n-nodes-netsuite` in **Enter npm package name**.
-4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes: select **I understand the risks of installing unverified code from a public source**.
-5. Select **Install**.
-
-After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
-
-### Manual installation
-
-To get started install the package in your n8n root directory:
-
-`npm install @drowl87/n8n-nodes-netsuite`
-
-For Docker-based deployments, add the following line before the font installation command in your [n8n Dockerfile](https://github.com/n8n-io/n8n/blob/master/docker/images/n8n/Dockerfile):
-
-`RUN cd /usr/local/lib/node_modules/n8n && npm install @drowl87/n8n-nodes-netsuite`
+After installation, search for **NetSuite M2M** in the workflow node picker. The credential is displayed as **NetSuite (TBA / M2M)**.
 
 ## Configuration
 
-### NetSuite
-1. Go to **Setup > Company > Enable Features**, navigate to the **SuiteCloud** tab. Under **Manage Authentication**, make sure that `Token-Based Authentication` is enabled.
-2. Go to **Setup > Integration > Manage Integrations > New** and name it something like `n8n Integration` and add a description. Leave `Token-Based Authentication` enabled, but uncheck `TBA: Authorization Flow` and any of the checkboxes under the `OAuth 2.0` heading. Save the `Consumer Key/Secret` for configuration with n8n.
-3. Go to **Setup > Users/Roles > Manage Roles > New** and make a custom role in NetSuite such as `REST API Integration - n8n`. **NOTE**: You may need to play around with permissions and add more if you are running into access errors.
-	- Under the **Authentication** header/dropdown, set it as a `Web services only` role
-	- Assign whatever **Transactions** or **Lists** permisions that align with your use case
-	- On **Setup**, make sure you assign at least `Log in using Access Tokens`, `User Access Tokens`, and `REST Web Services`
-4. Go to **Lists > Employees > Employees** and select a user. On the `Access` tab, assign the newly-created role.
-5. Go to **Setup > Users/Roles > Access Tokens > New**. Select the application name and user and role from above. Save the `Token Key/Secret` for configuration with n8n.
+Both authentication modes use these fields:
 
-### n8n
-1. Add NetSuite node to a workflow
-2. For credentials, assuming your regular NetSuite URL is `https://1234567.app.netsuite.com`, click `+Create new credential`
- 	- **Hostname**: Your hostname for this field would be `1234567.suitetalk.api.netsuite.com`
- 	- **Account ID**: This field's value would be `1234567`
- 	- **Consumer Key/Secret**: These fields come from the [NetSuite integration](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1540391670.html) located at `https://1234567.app.netsuite.com/app/common/integration/integrapplist.nl?whence=`
- 	- **Token Key/Secret**: These fields come from the access token that you configured at `https://1234567.app.netsuite.com/app/setup/accesstokens.nl?whence=`
+| Field | Description |
+| --- | --- |
+| Authentication | `OAuth 1.0 TBA` or `OAuth 2.0 M2M` |
+| Hostname | Account-specific SuiteTalk REST host, for example `1234567.suitetalk.api.netsuite.com` |
+| Account ID | Your NetSuite account ID |
 
-## Contributing
+Use the account-specific hostname for the relevant Sandbox or Production account. Do not enter your NetSuite UI hostname (such as `*.app.netsuite.com`).
 
-I'm fairly new to n8n so please feel free to add onto this and submit pull requests. Many thanks to the original work by [drudge](https://github.com/drudge/n8n-nodes-netsuite) and additions by [ianpogi5](https://github.com/ianpogi5/n8n-nodes-netsuite).
+### OAuth 2.0 M2M
 
-## License
+In NetSuite, configure an integration that supports OAuth 2.0 client credentials / M2M access, assign an appropriately restricted role, and register the public certificate associated with your signing key. Consult the [NetSuite documentation](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/) for the exact setup steps applicable to your account.
 
-MIT License
+In the n8n credential, select **OAuth 2.0 M2M** and provide:
 
-Copyright (c) 2022 Nicholas Penree <nick@penree.com>
+| Field | Description |
+| --- | --- |
+| Client ID | Client ID of the NetSuite integration |
+| Certificate ID | Certificate/key identifier registered in NetSuite |
+| Private Key (PEM) | Private RSA key corresponding to the registered certificate |
+| Scope | Defaults to `rest_webservices` |
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The implementation signs a short-lived client assertion JWT with **PS256**, exchanges it for an access token, caches the token in memory until close to expiry, and sends API calls with `Authorization: Bearer <token>`.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+**Security:** Never commit a private key, access token, or other credentials to GitHub. Enter the private key through n8n's credential interface. Grant only the NetSuite permissions your workflows need.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### OAuth 1.0 TBA
+
+In NetSuite, enable Token-Based Authentication, configure an integration and a role with the required REST permissions, and generate an access token for the integration/user/role combination.
+
+In the n8n credential, select **OAuth 1.0 TBA** and provide:
+
+- Consumer Key
+- Consumer Secret
+- Token Key
+- Token Secret
+
+OAuth 1.0 requests use the existing `@drowl87/netsuite-rest-api-client` dependency.
+
+## Operations
+
+| Operation | Description |
+| --- | --- |
+| List Records | Retrieve records of a selected type, with pagination options |
+| Get Record | Retrieve a record by internal ID (or supported external ID syntax) |
+| Insert Record | Create a record using the incoming item's JSON |
+| Update Record | Update a record using the incoming item's JSON |
+| Remove Record | Delete a record |
+| Execute SuiteQL | Run a SuiteQL query |
+| Raw Request | Send a custom REST API request |
+
+### Example: SuiteQL
+
+Choose **Execute SuiteQL** and enter:
+
+```sql
+SELECT id, entityid
+FROM customer
+```
+
+Use a role with access to the requested data. NetSuite account permissions and SuiteQL availability determine whether the query succeeds.
+
+### Example: Get Record
+
+Choose **Get Record**, set **Record Type** to **Customer**, and enter the customer's internal ID in **ID**.
+
+## Compatibility and testing
+
+- Package version: `0.1.0`
+- Node.js requirement declared by the package: `>=20`
+- Designed as an n8n community node; n8n 2.x runtime compatibility has **not yet been confirmed by a live installation test**.
+
+Before production use, test both authentication methods, SuiteQL, record reads and writes, error handling, and pagination in a non-production NetSuite environment.
+
+## Development
+
+```bash
+npm install
+npm run build
+npm run lint
+npm pack --dry-run
+```
+
+To publish a new version, update the version number and verify the package contents and functionality first. The GitHub Actions deployment workflow is configured for **manual triggering**, not automatic publishing on every push.
+
+## Project and support
+
+- Repository: https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m
+- Issues: https://github.com/cevahirkaragoez/n8n-nodes-netsuite-m2m/issues
+- npm package: https://www.npmjs.com/package/n8n-nodes-netsuite-m2m (available after first publication)
+
+## Credits and license
+
+This project builds on the earlier NetSuite community-node work by [Nicholas Penree](https://github.com/drudge), [Ian Dela Cruz](https://github.com/ianpogi5), and [David Rowley](https://github.com/drowl87).
+
+Licensed under the **MIT License**. See [LICENSE.md](LICENSE.md) for the original copyright notice and license terms.
